@@ -183,6 +183,18 @@ class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
             } catch (ex: ActivityNotFoundException) {
                 result.success("false")
             }
+        } else if (call.method == "shareLine") {
+            val message: String? = call.argument("message")
+            val urlScheme = "https://line.me/R/share?text=$message"
+            Log.d("log",urlScheme)
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(urlScheme)
+            try {
+                activity!!.startActivity(intent)
+                result.success("true")
+            } catch (ex: ActivityNotFoundException) {
+                result.success("false")
+            }
         }
         else if (call.method == "shareTelegram") {
             //shares content on Telegram

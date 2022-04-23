@@ -146,7 +146,6 @@
         pasteboard.string = content;
         result([NSNumber numberWithBool:YES]);
     } else if ([@"shareTwitter" isEqualToString:call.method]) {
-        // NSString *assetImage = call.arguments[@"assetImage"];
         NSString *captionText = call.arguments[@"captionText"];
         NSString *urlstring = call.arguments[@"url"];
         
@@ -154,12 +153,27 @@
         
         NSString* urlTextEscaped = [urlTwitterString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         
-        NSURL *urlSchemeSend = [NSURL URLWithString:urlTextEscaped];
+        NSURL *urlSend = [NSURL URLWithString:urlTextEscaped];
         if (@available(iOS 10.0, *)) {
-            [[UIApplication sharedApplication] openURL:urlSchemeSend options:@{} completionHandler:nil];
+            [[UIApplication sharedApplication] openURL:urlSend options:@{} completionHandler:nil];
             result(@"sharing");
         } else {
             result(@"this only supports iOS 10+");
+        }
+    } else if ([@"shareLine" isEqualToString:call.method]) {
+        NSString *message = call.arguments[@"message"];
+        if (message != nil) {
+            NSString *urlLineString = [NSString stringWithFormat:@"https://line.me/R/share?text=%@",message];
+            
+            NSString* urlTextEscaped = [urlLineString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+            
+            NSURL *urlSend = [NSURL URLWithString:urlTextEscaped];
+            if (@available(iOS 10.0, *)) {
+                [[UIApplication sharedApplication] openURL:urlSend options:@{} completionHandler:nil];
+                result(@"sharing");
+            } else {
+                result(@"this only supports iOS 10+");
+            }
         }
     } else if ([@"shareSms" isEqualToString:call.method]) {
         NSString *msg = call.arguments[@"message"];
