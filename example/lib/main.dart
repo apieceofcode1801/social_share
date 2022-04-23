@@ -94,6 +94,11 @@ class _MyAppState extends State<MyApp> {
                   child: Text("Share On Instagram Story with background"),
                 ),
                 ElevatedButton(
+                    onPressed: () {
+                      SocialShare.shareFacebook('Hello', 'http://facebook.com');
+                    },
+                    child: Text('Share facebook post')),
+                ElevatedButton(
                   onPressed: () async {
                     await screenshotController.capture().then((image) async {
                       final directory =

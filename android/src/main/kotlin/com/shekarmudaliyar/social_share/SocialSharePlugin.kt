@@ -5,19 +5,19 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import androidx.annotation.NonNull
+import androidx.core.content.FileProvider
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import androidx.core.content.FileProvider
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.io.File
+import com.facebook.share.model.ShareLinkContent
+import com.facebook.share.widget.ShareDialog
 
 class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var channel: MethodChannel
@@ -95,6 +95,17 @@ class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success("success")
             } else {
                 result.success("error")
+            }
+        } else if (call.method == "shareFacebook") {
+            val url: String? = call.argument("url")
+            val shareDialog = ShareDialog(activity!!)
+            // this part is optional
+            val content = ShareLinkContent.Builder()
+                .setContentUrl(Uri.parse(url))
+                .build()
+            if (ShareDialog.canShow(ShareLinkContent::class.java)) {
+                shareDialog.show(content,ShareDialog.Mode.NATIVE)
+                result.success("success")
             }
         } else if (call.method == "shareOptions") {
             //native share options

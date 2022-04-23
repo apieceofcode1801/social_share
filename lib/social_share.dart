@@ -108,6 +108,14 @@ class SocialShare {
     return response;
   }
 
+  static Future<String?> shareFacebook(String? url) async {
+    Map<String, dynamic> args = {
+      'url': url,
+    };
+    final String? response = await _channel.invokeMethod('shareFacebook', args);
+    return response;
+  }
+
   static Future<String?> shareTwitter(String captionText,
       {List<String>? hashtags, String? url, String? trailingText}) async {
     Map<String, dynamic> args;

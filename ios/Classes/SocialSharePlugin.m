@@ -8,9 +8,20 @@
 
 @implementation SocialSharePlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+    [FBSDKApplicationDelegate initialize];
     FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"social_share" binaryMessenger:[registrar messenger]];
     SocialSharePlugin* instance = [[SocialSharePlugin alloc] init];
     [registrar addMethodCallDelegate:instance channel:channel];
+    [registrar addApplicationDelegate:instance];
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
+    return [[FBSDKApplicationDelegate sharedInstance] application:application openURL:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey
+                                                                                                                    ] annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+}
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    return [[FBSDKApplicationDelegate sharedInstance] application:application didFinishLaunchingWithOptions: launchOptions];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -117,6 +128,16 @@
             }
         } else {
             result(@"not supported or no facebook installed");
+        }
+    } else if ([@"shareFacebook" isEqualToString:call.method]) {
+        NSString *urlString = call.arguments[@"url"];
+        if (urlString != nil) {
+            NSString* urlTextEscaped = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+            NSURL *urlSend = [NSURL URLWithString:urlTextEscaped];
+            FBSDKShareLinkContent *content = [[FBSDKShareLinkContent alloc] init];
+            content.contentURL = urlSend;
+            FBSDKShareDialog *dialog = [[FBSDKShareDialog alloc] initWithViewController:[UIApplication sharedApplication].keyWindow.rootViewController content:content delegate:self];
+            [dialog show];
         }
     } else if ([@"copyToClipboard" isEqualToString:call.method]) {
         NSString *content = call.arguments[@"content"];
@@ -298,6 +319,18 @@
     } else {
         result(FlutterMethodNotImplemented);
     }
+}
+
+- (void)sharerDidCancel:(id<FBSDKSharing>)sharer {
+    NSLog(@"Did cancel");
+}
+
+- (void)sharer:(id<FBSDKSharing>)sharer didFailWithError:(NSError *)error {
+    NSLog(@"%@", [NSString stringWithFormat:@"Fail with error: %@", error]);
+}
+
+- (void)sharer:(id<FBSDKSharing>)sharer didCompleteWithResults:(NSDictionary<NSString *,id> *)results {
+    NSLog(@"Complete");
 }
 
 @end
